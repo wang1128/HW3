@@ -136,6 +136,26 @@ def perceptron(maxIter,review_list,review_label,list_word,feature_array): #Perce
 
     return w
 
+def GD(maxIterations,review_list,review_label,list_word,feature_array,regularization,stepSize,lmbd,featureSet):
+    w = np.zeros(list_word.__len__())
+    maxIter = maxIterations
+    b=0
+    for iteration in range(maxIter):
+        w_copy =w
+        random_idx = np.random.permutation(review_list.__len__())
+        g= np.zeros(list_word.__len__())
+        g_bias = 0
+        for row_idx in random_idx:
+            y= np.dot(w,feature_array[row_idx])+b
+            review_l = review_label[row_idx]
+            if y <=1:
+                g=g + review_l* feature_array[row_idx]
+                g_bias = g_bias + y
+
+        g = g - lmbd*w
+        w = w + stepSize*g
+        b = b + stepSize*g_bias
+    return w,b
 
 def winnow(maxIter,review_list,review_label,list_word,feature_array):  #winnow algorithm
     w = np.ones(list_word.__len__())
@@ -167,7 +187,7 @@ def winnow(maxIter,review_list,review_label,list_word,feature_array):  #winnow a
     return w
 #print(winnow(10))
 
-def calPrecsion_p(filename,list_word,w,condition,type): #calculate precision
+def calPrecsion_p(filename,list_word,w,condition,type,bias): #calculate precision
     vreviewlist,vreviewlabel = cal_reviewlistlabel(filename)
     if condition == 1: #1 means unigram
         vfeatureArray = cal_feature_array(vreviewlist,list_word)
@@ -175,7 +195,7 @@ def calPrecsion_p(filename,list_word,w,condition,type): #calculate precision
         vfeatureArray = cal_bifeature_array(vreviewlist,list_word)
     if condition == 3: #3 means both
         vfeatureArray = cal_both_feature_array(vreviewlist,list_word)
-    b=0
+    b=bias
     turePositiveCount=0.0
     falsePositiveCount = 0.0
     if type == 1: #perceptron is type 1
@@ -210,7 +230,7 @@ def calPrecsion_p(filename,list_word,w,condition,type): #calculate precision
 
     return(precision)
 
-def calRecall_p(filename,list_word,w,condition,type): #calculate recall
+def calRecall_p(filename,list_word,w,condition,type,bias): #calculate recall
     vreviewlist,vreviewlabel = cal_reviewlistlabel(filename) # generate a new review list that contain different words
     if condition == 1: #1 means unigram
         vfeatureArray = cal_feature_array(vreviewlist,list_word)
@@ -218,7 +238,7 @@ def calRecall_p(filename,list_word,w,condition,type): #calculate recall
         vfeatureArray = cal_bifeature_array(vreviewlist,list_word)
     if condition == 3: #3 means both
         vfeatureArray = cal_both_feature_array(vreviewlist,list_word)
-    b=0
+    b=bias
     turePositiveCount=0.0
     falseNegativeCount = 0.0
     if type == 1: #perceptron is type 1
@@ -262,7 +282,7 @@ def predict_one_p(w,input_snippet ): #it calculate the y, then in the perceptron
     y = np.dot(w,input_snippet) + b #for perceptron
     return y
 
-def calTrainError_p(filename,list_word,w,condition,type): #calculate accuracy
+def calTrainError_p(filename,list_word,w,condition,type,bias): #calculate accuracy
     vreviewlist,vreviewlabel = cal_reviewlistlabel(filename)
     if condition == 1: #1 means unigram
         vfeatureArray = cal_feature_array(vreviewlist,list_word)
@@ -270,11 +290,11 @@ def calTrainError_p(filename,list_word,w,condition,type): #calculate accuracy
         vfeatureArray = cal_bifeature_array(vreviewlist,list_word)
     if condition == 3: #3 means both
         vfeatureArray = cal_both_feature_array(vreviewlist,list_word)
-    b=0
+    b=bias
     count=0.0
     if type == 1: #perceptron is type 1
         for idx in range(vreviewlist.__len__()):
-            y = predict_one_p(w,vfeatureArray[idx])
+            y = predict_one_p(w,vfeatureArray[idx]) + b
             if y>0:
                 predict_label = 1
             else:
@@ -298,12 +318,12 @@ def calTrainError_p(filename,list_word,w,condition,type): #calculate accuracy
                 count=count+1
     return((vreviewlist.__len__()-count)/vreviewlist.__len__())
 
-def calaprf(w,filename,list_word,condition,type):
+def calaprf(w,filename,list_word,condition,type,bias):
 
-    print(calTrainError_p(filename,list_word,w,condition,type))
-    precision_uni_train =calPrecsion_p(filename,list_word,w,condition,type)
+    print(calTrainError_p(filename,list_word,w,condition,type,bias))
+    precision_uni_train =calPrecsion_p(filename,list_word,w,condition,type,bias)
     print(precision_uni_train)
-    recall_uni_train = calRecall_p(filename,list_word,w,condition,type)
+    recall_uni_train = calRecall_p(filename,list_word,w,condition,type,bias)
     print(recall_uni_train)
     fscore_uni_train = calFscore(precision_uni_train,recall_uni_train)
     print(fscore_uni_train)
@@ -315,7 +335,11 @@ list_bothWord = []
 list_bothWord = list_uniWord + list_biWord
 # the first parameter is maxIter
 # When run the program, it will print the w and all accuracy, precision, recall, and fscore of each file
-w = perceptron(10,review_list,review_label,list_uniWord,cal_feature_array(review_list,list_uniWord)) #cal_feature_array is for unigram only
+#w = perceptron(10,review_list,review_label,list_uniWord,cal_feature_array(review_list,list_uniWord)) #cal_feature_array is for unigram only
+w,bias= GD(10,review_list,review_label,list_uniWord,cal_feature_array(review_list,list_uniWord),1,0.0005,0.001,1)
+print(w)
+print(bias)
+calaprf(w,'train.csv',list_uniWord,1,1,0)
 '''
 print(w)
 calaprf(w,'train.csv',list_uniWord,1,1) # first is condition, condition 1 is for unigram. type 1 is perceptron
