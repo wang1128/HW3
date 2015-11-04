@@ -136,26 +136,55 @@ def perceptron(maxIter,review_list,review_label,list_word,feature_array): #Perce
 
     return w
 
-def GD(maxIterations,review_list,review_label,list_word,feature_array,regularization,stepSize,lmbd,featureSet):
+def GD(maxIterations,review_list,review_label,list_word,regularization,stepSize,lmbd,featureSet):
+    if featureSet ==1:
+        feature_array = cal_feature_array(review_list,list_uniWord)
+    if featureSet ==2:
+        feature_array = cal_bifeature_array(review_list,list_biWord)
+    if featureSet ==3:
+        feature_array = cal_both_feature_array(review_list,list_bothWord)
     w = np.zeros(list_word.__len__())
     maxIter = maxIterations
     b=0
+    o_old = obj(w,lmbd,review_label,list_word,feature_array)
     for iteration in range(maxIter):
         w_copy =w
         random_idx = np.random.permutation(review_list.__len__())
         g= np.zeros(list_word.__len__())
         g_bias = 0
-        for row_idx in random_idx:
+        for row_idx in range(list_word.__len__()):
+
             y= np.dot(w,feature_array[row_idx])+b
             review_l = review_label[row_idx]
-            if y <=1:
-                g=g + review_l* feature_array[row_idx]
-                g_bias = g_bias + y
-
-        g = g - lmbd*w
+            y1=review_l
+            if y*y1 <=1:
+                g=g + y1* feature_array[row_idx]
+                g_bias = g_bias + y1
+        if regularization ==2:
+            g = g - lmbd*w
+        if regularization ==1:
+            g= g - lmbd*(np.sign(w))
         w = w + stepSize*g
         b = b + stepSize*g_bias
+
+        o=obj(w,lmbd,review_label,list_word,feature_array)
+        if np.absolute(o-o_old)<0.001:
+            print(iteration)
+            print("Converge")
+            return w,b
+        o_old=o
+        #print(o)
     return w,b
+
+def obj(w,lmbd,review_label,list_word,feature_array):
+    w=np.array(w)
+    loss =0
+    for row_idx in range(list_word.__len__()):
+        y= review_label[row_idx]
+        x=np.array(feature_array[row_idx])
+        loss = loss + max(0,1-y*np.dot(w,x))
+
+    return lmbd*0.5*vectornorm(w)**2 + loss
 
 def winnow(maxIter,review_list,review_label,list_word,feature_array):  #winnow algorithm
     w = np.ones(list_word.__len__())
@@ -328,6 +357,15 @@ def calaprf(w,filename,list_word,condition,type,bias):
     fscore_uni_train = calFscore(precision_uni_train,recall_uni_train)
     print(fscore_uni_train)
 
+def vectornorm(w):
+    norm =0
+    for one in w:
+        norm = np.absolute(one)**2
+    return norm**(1/2)
+
+
+
+
 review_list,review_label = cal_reviewlistlabel('train.csv')
 list_uniWord = calListuniWord(review_list)
 list_biWord = calListbiWord(review_list)
@@ -336,10 +374,27 @@ list_bothWord = list_uniWord + list_biWord
 # the first parameter is maxIter
 # When run the program, it will print the w and all accuracy, precision, recall, and fscore of each file
 #w = perceptron(10,review_list,review_label,list_uniWord,cal_feature_array(review_list,list_uniWord)) #cal_feature_array is for unigram only
-w,bias= GD(10,review_list,review_label,list_uniWord,cal_feature_array(review_list,list_uniWord),1,0.0005,0.001,1)
+w,bias= GD(10000,review_list,review_label,list_uniWord,2,0.0005,0.001,1)
 print(w)
 print(bias)
-calaprf(w,'train.csv',list_uniWord,1,1,0)
+
+calaprf(w,'train.csv',list_uniWord,1,1,bias)
+calaprf(w,'validation.csv',list_uniWord,1,1,bias)
+calaprf(w,'test.csv',list_uniWord,1,1,bias)
+
+w2,bias2= GD(10000,review_list,review_label,list_uniWord,cal_feature_array(review_list,list_uniWord),1,0.0005,0.0001,1)
+print(w2)
+print(bias2)
+calaprf(w2,'train.csv',list_uniWord,1,1,bias2)
+calaprf(w,'validation.csv',list_uniWord,1,1,0)
+
+w_bi,bias_bi= GD(10000,review_list,review_label,list_biWord,2,0.0005,0.001,2)
+print(w_bi)
+print(bias_bi)
+calaprf(w_bi,'train.csv',list_biWord,2,1,bias_bi)
+calaprf(w_bi,'validation.csv',list_biWord,2,1,bias_bi)
+calaprf(w_bi,'test.csv',list_biWord,2,1,bias_bi)
+
 '''
 print(w)
 calaprf(w,'train.csv',list_uniWord,1,1) # first is condition, condition 1 is for unigram. type 1 is perceptron
