@@ -173,7 +173,8 @@ def GD(maxIterations,review_list,review_label,list_word,regularization,stepSize,
             print("Converge")
             return w,b
         o_old=o
-        #print(o)
+
+    #print(o)
     return w,b
 
 def obj(w,lmbd,review_label,list_word,feature_array):
@@ -363,72 +364,87 @@ def vectornorm(w):
         norm = np.absolute(one)**2
     return norm**(1/2)
 
-
-
-
 review_list,review_label = cal_reviewlistlabel('train.csv')
 list_uniWord = calListuniWord(review_list)
 list_biWord = calListbiWord(review_list)
 list_bothWord = []
 list_bothWord = list_uniWord + list_biWord
-# the first parameter is maxIter
-# When run the program, it will print the w and all accuracy, precision, recall, and fscore of each file
-#w = perceptron(10,review_list,review_label,list_uniWord,cal_feature_array(review_list,list_uniWord)) #cal_feature_array is for unigram only
-w,bias= GD(10000,review_list,review_label,list_uniWord,2,0.0005,0.001,1)
-print(w)
-print(bias)
 
-calaprf(w,'train.csv',list_uniWord,1,1,bias)
-calaprf(w,'validation.csv',list_uniWord,1,1,bias)
-calaprf(w,'test.csv',list_uniWord,1,1,bias)
-
-w2,bias2= GD(10000,review_list,review_label,list_uniWord,cal_feature_array(review_list,list_uniWord),1,0.0005,0.0001,1)
-print(w2)
-print(bias2)
-calaprf(w2,'train.csv',list_uniWord,1,1,bias2)
-calaprf(w,'validation.csv',list_uniWord,1,1,0)
-
-w_bi,bias_bi= GD(10000,review_list,review_label,list_biWord,2,0.0005,0.001,2)
-print(w_bi)
-print(bias_bi)
-calaprf(w_bi,'train.csv',list_biWord,2,1,bias_bi)
-calaprf(w_bi,'validation.csv',list_biWord,2,1,bias_bi)
-calaprf(w_bi,'test.csv',list_biWord,2,1,bias_bi)
-
-'''
-print(w)
-calaprf(w,'train.csv',list_uniWord,1,1) # first is condition, condition 1 is for unigram. type 1 is perceptron
-print("validation")
-calaprf(w,'validation.csv',list_uniWord,1,1)
-print ("test")
-calaprf(w,'test.csv',list_uniWord,1,1)
+def main():
 
 
-w = perceptron(40,review_list,review_label,list_biWord,cal_bifeature_array(review_list,list_biWord))
-print("bigram")
-print(w)
-calaprf(w,'train.csv',list_biWord,2,1) # first one is condition, condition 2 is for bigram. type 1 is perceptron
-print("validation")
-calaprf(w,'validation.csv',list_biWord,2,1)
-print ("test")
-calaprf(w,'test.csv',list_biWord,2,1)
+    # the first parameter is maxIter
+    # When run the program, it will print the w and all accuracy, precision, recall, and fscore of each file
+    #w = perceptron(10,review_list,review_label,list_uniWord,cal_feature_array(review_list,list_uniWord)) #cal_feature_array is for unigram only
+    w,bias= GD(10000,review_list,review_label,list_uniWord,2,0.005,0.01,1)
+    print(w)
+    print(bias)
 
-w = perceptron(30,review_list,review_label,list_bothWord,cal_both_feature_array(review_list,list_bothWord))
-print("both")
-print(w)
-calaprf(w,'train.csv',list_bothWord,3,1) # first one is condition, condition 3 is for both unigram and bigram. type 1 is perceptron
-print("validation")
-calaprf(w,'validation.csv',list_bothWord,3,1)
-print ("test")
-calaprf(w,'test.csv',list_bothWord,3,1)
+    calaprf(w,'train.csv',list_uniWord,1,1,bias)
+    calaprf(w,'validation.csv',list_uniWord,1,1,bias)
+    calaprf(w,'test.csv',list_uniWord,1,1,bias)
+
+    w2,bias2= GD(10000,review_list,review_label,list_uniWord,1,0.005,0.01,1)
+    print(w2)
+    print(bias2)
+    calaprf(w2,'train.csv',list_uniWord,1,1,bias2)
+    calaprf(w2,'validation.csv',list_uniWord,1,1,bias2)
+    calaprf(w2,'test.csv',list_uniWord,1,1,bias2)
+
+    '''
+    w3,bias3= GD(10000,review_list,review_label,list_uniWord,2,0.0005,0.01,1)
+    print(w3)
+    print(bias3)
+
+    calaprf(w3,'train.csv',list_uniWord,1,1,bias3)
+    calaprf(w3,'validation.csv',list_uniWord,1,1,bias3)
+    calaprf(w3,'test.csv',list_uniWord,1,1,bias3)
 
 
-w_winnow = winnow(10,review_list,review_label,list_uniWord,cal_feature_array(review_list,list_uniWord)) #cal_feature_array is for unigram only
+
+    w_bi,bias_bi= GD(10000,review_list,review_label,list_biWord,2,0.0005,0.001,2)
+    print(w_bi)
+    print(bias_bi)
+    calaprf(w_bi,'train.csv',list_biWord,2,1,bias_bi)
+    calaprf(w_bi,'validation.csv',list_biWord,2,1,bias_bi)
+    calaprf(w_bi,'test.csv',list_biWord,2,1,bias_bi)
 
 
-calaprf(w_winnow,'train.csv',list_uniWord,1,2) # first is condition, condition 1 is for unigram. type 2 is winnow
-print("validation")
-calaprf(w_winnow,'validation.csv',list_uniWord,1,2)
-print ("test")
-calaprf(w_winnow,'test.csv',list_uniWord,1,2)
-'''
+    print(w)
+    calaprf(w,'train.csv',list_uniWord,1,1) # first is condition, condition 1 is for unigram. type 1 is perceptron
+    print("validation")
+    calaprf(w,'validation.csv',list_uniWord,1,1)
+    print ("test")
+    calaprf(w,'test.csv',list_uniWord,1,1)
+
+
+    w = perceptron(40,review_list,review_label,list_biWord,cal_bifeature_array(review_list,list_biWord))
+    print("bigram")
+    print(w)
+    calaprf(w,'train.csv',list_biWord,2,1) # first one is condition, condition 2 is for bigram. type 1 is perceptron
+    print("validation")
+    calaprf(w,'validation.csv',list_biWord,2,1)
+    print ("test")
+    calaprf(w,'test.csv',list_biWord,2,1)
+
+    w = perceptron(30,review_list,review_label,list_bothWord,cal_both_feature_array(review_list,list_bothWord))
+    print("both")
+    print(w)
+    calaprf(w,'train.csv',list_bothWord,3,1) # first one is condition, condition 3 is for both unigram and bigram. type 1 is perceptron
+    print("validation")
+    calaprf(w,'validation.csv',list_bothWord,3,1)
+    print ("test")
+    calaprf(w,'test.csv',list_bothWord,3,1)
+
+
+    w_winnow = winnow(10,review_list,review_label,list_uniWord,cal_feature_array(review_list,list_uniWord)) #cal_feature_array is for unigram only
+
+
+    calaprf(w_winnow,'train.csv',list_uniWord,1,2) # first is condition, condition 1 is for unigram. type 2 is winnow
+    print("validation")
+    calaprf(w_winnow,'validation.csv',list_uniWord,1,2)
+    print ("test")
+    calaprf(w_winnow,'test.csv',list_uniWord,1,2)
+    '''
+if __name__ == '__main__':
+    main()
