@@ -152,7 +152,7 @@ def GD(maxIterations,review_list,review_label,list_word,regularization,stepSize,
         random_idx = np.random.permutation(review_list.__len__())
         g= np.zeros(list_word.__len__())
         g_bias = 0
-        for row_idx in range(list_word.__len__()):
+        for row_idx in range(review_label.__len__()):
 
             y= np.dot(w,feature_array[row_idx])+b
             review_l = review_label[row_idx]
@@ -180,7 +180,7 @@ def GD(maxIterations,review_list,review_label,list_word,regularization,stepSize,
 def obj(w,lmbd,review_label,list_word,feature_array):
     w=np.array(w)
     loss =0
-    for row_idx in range(list_word.__len__()):
+    for row_idx in range(review_label.__len__()):
         y= review_label[row_idx]
         x=np.array(feature_array[row_idx])
         loss = loss + max(0,1-y*np.dot(w,x))
