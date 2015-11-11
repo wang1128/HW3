@@ -1,4 +1,4 @@
-# HW2-
+# HW3-
 All right reserved
 - The numpy and csv function are imported. Numpy is used to calculate the perceptron and winnow algorithm.
 
