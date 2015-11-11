@@ -282,18 +282,19 @@ def main():
     # the first parameter is maxIter
     # When run the program, it will print the w and all accuracy, precision, recall, and fscore of each file
 
-    print("ul1")
+    print("Unigram -l1 The maxiter is 750, it is an example")
     w,bias= GD(750,review_list,review_label,list_uniWord,1,0.0005,0.001,1) #l1
     print(w)
     print(bias)
     print("train")
     calaprf(w,'train.csv',list_uniWord,1,1,bias)
-    print("v")
+    print("validation")
     calaprf(w,'validation.csv',list_uniWord,1,1,bias)
     print("test")
     calaprf(w,'test.csv',list_uniWord,1,1,bias)
-    print("ul2")
     '''
+    print("ul2")
+
     w,bias= GD(375,review_list,review_label,list_uniWord,2,0.0005,0.001,1)
     print(w)
     print(bias)
